@@ -6,61 +6,36 @@ using System.Web;
 
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
+using Microsoft.Bot.Builder.Luis;
+using Microsoft.Bot.Builder.Luis.Models;
 
 namespace TravelAdvisorBot.Dialogs
 {
     [Serializable]
-    public class RootDialog : IDialog<object>
+    [LuisModel("2ff82461-9ffe-4e55-8d51-f2fd808b0691", "f0392b343da4490f9bc91197d6a5eda2")]
+    public class RootDialog : LuisDialog<object>
     {
         private const string TravelAdviceOption = "Travel Advice";
         private const string SearchFlightsOption = "Search Flights";
         private const string SearchHotelsOption = "Search Hotels";
             
-        public async Task StartAsync(IDialogContext context)
+        [LuisIntent("")]
+        [LuisIntent("None")]
+        public async Task None(IDialogContext context, LuisResult result)
         {
-            context.Wait(this.MessageReceivedAsync);
+            string message = $"Sorry, I did not understand '{result.Query}'. Type 'help' if you need assistance.";
+
+            await context.PostAsync(message);
+
+            context.Wait(this.MessageReceived);
         }
 
-        public virtual async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> result)
+        [LuisIntent("Help")]
+        public async Task Help(IDialogContext context, LuisResult result)
         {
-            var activity = (Activity)await result;
+            await context.PostAsync("Hi! Try asking me things like 'search hotels in Seattle', 'search hotels near LAX airport' or 'show me the reviews of The Bot Resort'");
 
-            // Handle conversation state changes, like members being added and removed
-            // Use Activity.MembersAdded and Activity.MembersRemoved and Activity.Action for info
-            // Not available in all channels
-            if (activity.Type == ActivityTypes.ConversationUpdate)
-            {
-                if (activity.MembersAdded != null && activity.MembersAdded.Any())
-                {
-
-                }
-
-                if (activity.MembersRemoved != null && activity.MembersRemoved.Any())
-                {
-
-                }
-            }
-            else if (activity.Type == ActivityTypes.ContactRelationUpdate)
-            {
-                // Handle add/remove from contact lists
-                // Activity.From + Activity.Action represent what happened
-
-            }
-
-            if (activity.Type == ActivityTypes.Message)
-            {
-                var message = await result;
-
-                var attachment = CreateRootDialogHeroCard();
-
-                var reply = context.MakeMessage();
-
-                reply.Attachments.Add(attachment);
-
-                await context.PostAsync(reply);
-
-                context.Wait(this.MessageReceivedAsync);
-            }
+            context.Wait(this.MessageReceived);
         }
 
         private static Attachment CreateRootDialogHeroCard()
