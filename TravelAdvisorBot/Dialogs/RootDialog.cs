@@ -215,6 +215,184 @@ namespace TravelAdvisorBot.Dialogs
         }
         #endregion
 
+        #region Search Flights
+
+        private const string EntityDepartureCity = "DepartureCity";
+        private const string EntityArrivalCity = "ArrivalCity";
+        private const string EntityDepartureDate = "DepartureDate";
+        private const string EntityReturnDate = "ReturnDate";
+
+        [LuisIntent("SearchFlights")]
+        public async Task SearchFlights(IDialogContext context, IAwaitable<IMessageActivity> activity, LuisResult result)
+        {
+            var message = await activity;
+
+            await context.PostAsync($"Searching for Flights w/ '{message.Text}'");
+
+            var flightsQuery = new FlightsQuery();
+
+            EntityRecommendation departureCityEntityRecommendation;
+            if (result.TryFindEntity(EntityDepartureCity, out departureCityEntityRecommendation))
+            {
+                departureCityEntityRecommendation.Type = "DepartureCity";
+            }
+
+            EntityRecommendation arrivalCityEntityRecommendation;
+            if (result.TryFindEntity(EntityArrivalCity, out arrivalCityEntityRecommendation))
+            {
+                arrivalCityEntityRecommendation.Type = "ArrivalCity";
+            }
+
+            EntityRecommendation departureDateEntityRecommendation;
+            if (result.TryFindEntity(EntityDepartureDate, out departureDateEntityRecommendation))
+            {
+                departureDateEntityRecommendation.Type = "DepartureDate";
+            }
+
+            EntityRecommendation returnDateEntityRecommendation;
+            if (result.TryFindEntity(EntityReturnDate, out returnDateEntityRecommendation))
+            {
+                returnDateEntityRecommendation.Type = "ReturnDate";
+            }
+
+            var searchFlightsFormDialog = new FormDialog<FlightsQuery>(flightsQuery, this.BuildSearchFlightsForm, FormOptions.PromptInStart, result.Entities);
+
+            context.Call(searchFlightsFormDialog, this.ResumeAfterSearchFlightsFormDialog);
+        }
+
+        private async Task ResumeAfterSearchFlightsFormDialog(IDialogContext context, IAwaitable<FlightsQuery> result)
+        {
+            try
+            {
+                var searchQuery = await result;
+
+                var flights = await this.GetFlightsAsync(searchQuery);
+
+                await context.PostAsync($"I found {flights.Count()} flights:");
+
+                var resultMessage = context.MakeMessage();
+                resultMessage.AttachmentLayout = AttachmentLayoutTypes.Carousel;
+                resultMessage.Attachments = new List<Attachment>();
+
+                foreach (var flight in flights)
+                {
+                    HeroCard heroCard = new HeroCard()
+                    {
+                        Title = $"{flight.Price}",
+                        Subtitle = $"",
+                        Images = new List<CardImage>()
+                        {
+                            new CardImage() { Url = flight.Image }
+                        },
+                        Buttons = new List<CardAction>()
+                        {
+                            new CardAction()
+                            {
+                                Title = "More details",
+                                Type = ActionTypes.OpenUrl,
+                                Value = $"https://www.bing.com/search?q=flights+from+" + HttpUtility.UrlEncode(flight.DepartureAirport) + "+to+" + HttpUtility.UrlEncode(flight.DepartureAirport)
+                            }
+                        }
+                    };
+
+                    resultMessage.Attachments.Add(heroCard.ToAttachment());
+                }
+
+                await context.PostAsync(resultMessage);
+            }
+            catch (FormCanceledException ex)
+            {
+                string reply;
+
+                if (ex.InnerException == null)
+                {
+                    reply = "You have canceled the operation.";
+                }
+                else
+                {
+                    reply = $"Oops! Something went wrong :( Technical Details: {ex.InnerException.Message}";
+                }
+
+                await context.PostAsync(reply);
+            }
+            finally
+            {
+                context.Done<object>(null);
+            }
+        }
+
+        private async Task<IEnumerable<Flight>> GetFlightsAsync(FlightsQuery searchQuery)
+        {
+            var flights = new List<Flight>();
+
+            // Filling in the flight details manually for demo purposes...
+            for (int i = 0; i < 5; i++)
+            {
+                var random = new Random(i);
+                Flight flight = new Flight()
+                {
+                    DepartureAirport = $"{searchQuery.DepartureCity} (YYY)",
+                    DepartureAirline = "Alaska",
+                    DepartureDateTime = searchQuery.DepartureDate,
+                    DepartureFlightNumber = random.Next(101, 9999).ToString(),
+                    ReturnAirport = $"{searchQuery.ArrivalCity} (WWW)",
+                    ReturnAirline = "United",
+                    ReturnDateTime = searchQuery.ReturnDate,
+                    ReturnFlightNumber = random.Next(101, 9999).ToString(),
+                    Price = random.Next(80, 450),
+                    Image = $"https://placeholdit.imgix.net/~text?txtsize=35&txt=Flight+{i}&w=200&h=100"
+                };
+
+                flights.Add(flight);
+            }
+
+            flights.Sort((f1, f2) => f1.Price.CompareTo(f2.Price));
+
+            return flights;
+        }
+
+        private IForm<FlightsQuery> BuildSearchFlightsForm()
+        {
+            OnCompletionAsyncDelegate<FlightsQuery> processFlightsSearch = async (context, state) =>
+            {
+                var message = "Searching for flights";
+
+                if (!string.IsNullOrEmpty(state.DepartureCity))
+                {
+                    message += $" from {state.DepartureCity}";
+                }
+
+                if (!string.IsNullOrEmpty(state.ArrivalCity))
+                {
+                    message += $" to {state.ArrivalCity}";
+                }
+
+                if (state.DepartureDate != DateTime.MinValue)
+                {
+                    message += $" leaving on {state.DepartureDate}";
+                }
+
+                if (state.ReturnDate != DateTime.MinValue)
+                {
+                    message += $" returning on {state.ReturnDate}";
+                }
+
+                message += "...";
+
+                await context.PostAsync(message);
+            };
+
+            return new FormBuilder<FlightsQuery>()
+                .Field(nameof(FlightsQuery.DepartureCity), (state) => string.IsNullOrEmpty(state.DepartureCity))
+                .Field(nameof(FlightsQuery.ArrivalCity), (state) => string.IsNullOrEmpty(state.ArrivalCity))
+                .Field(nameof(FlightsQuery.DepartureDate), (state) => { return state.DepartureDate != DateTime.MinValue; })
+                .Field(nameof(FlightsQuery.ReturnDate), (state) => { return state.ReturnDate != DateTime.MinValue; })
+                .OnCompletion(processFlightsSearch)
+                .Build();
+        }
+
+        #endregion
+
         private const string TravelAdviceOption = "Travel Advice";
         private const string SearchFlightsOption = "Search Flights";
         private const string SearchHotelsOption = "Search Hotels";
