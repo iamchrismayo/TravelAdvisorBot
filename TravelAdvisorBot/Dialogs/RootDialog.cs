@@ -248,7 +248,7 @@ namespace TravelAdvisorBot.Dialogs
             {
                 // Always returns a string for the entity, either custom or built in.
                 //  Can use DateTime.Parse then turn back into a string to get 11/2 to 11/2/2016.
-                //  Or, would it be better 
+                //  Or, would it be better to do this during the call to the web service?
                 departureDateEntityRecommendation.Type = "DepartureDate";
             }
 
