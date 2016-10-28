@@ -217,10 +217,10 @@ namespace TravelAdvisorBot.Dialogs
 
         #region Search Flights
 
-        private const string EntityDepartureCity = "DepartureCity";
-        private const string EntityArrivalCity = "ArrivalCity";
-        private const string EntityDepartureDate = "DepartureDate";
-        private const string EntityReturnDate = "ReturnDate";
+        private const string EntityDepartureCity = "City::DepartureCity";
+        private const string EntityArrivalCity = "City::ReturnCity";
+        private const string EntityDepartureDate = "Date::DepartureDate";
+        private const string EntityReturnDate = "Date::ReturnDate";
 
         [LuisIntent("SearchFlights")]
         public async Task SearchFlights(IDialogContext context, IAwaitable<IMessageActivity> activity, LuisResult result)
@@ -240,12 +240,15 @@ namespace TravelAdvisorBot.Dialogs
             EntityRecommendation arrivalCityEntityRecommendation;
             if (result.TryFindEntity(EntityArrivalCity, out arrivalCityEntityRecommendation))
             {
-                arrivalCityEntityRecommendation.Type = "ArrivalCity";
+                arrivalCityEntityRecommendation.Type = "ReturnCity";
             }
 
             EntityRecommendation departureDateEntityRecommendation;
             if (result.TryFindEntity(EntityDepartureDate, out departureDateEntityRecommendation))
             {
+                // Always returns a string for the entity, either custom or built in.
+                //  Can use DateTime.Parse then turn back into a string to get 11/2 to 11/2/2016.
+                //  Or, would it be better 
                 departureDateEntityRecommendation.Type = "DepartureDate";
             }
 
@@ -278,7 +281,7 @@ namespace TravelAdvisorBot.Dialogs
                 {
                     HeroCard heroCard = new HeroCard()
                     {
-                        Title = $"{flight.Price}",
+                        Title = $"${flight.Price}",
                         Subtitle = $"",
                         Images = new List<CardImage>()
                         {
@@ -335,12 +338,12 @@ namespace TravelAdvisorBot.Dialogs
                     DepartureAirline = "Alaska",
                     DepartureDateTime = searchQuery.DepartureDate,
                     DepartureFlightNumber = random.Next(101, 9999).ToString(),
-                    ReturnAirport = $"{searchQuery.ArrivalCity} (WWW)",
+                    ReturnAirport = $"{searchQuery.ReturnCity} (WWW)",
                     ReturnAirline = "United",
                     ReturnDateTime = searchQuery.ReturnDate,
                     ReturnFlightNumber = random.Next(101, 9999).ToString(),
                     Price = random.Next(80, 450),
-                    Image = $"https://placeholdit.imgix.net/~text?txtsize=35&txt=Flight+{i}&w=200&h=100"
+                    Image = $"https://placeholdit.imgix.net/~text?txtsize=35&txt=Flight+{i + 1}&w=200&h=100"
                 };
 
                 flights.Add(flight);
@@ -362,9 +365,9 @@ namespace TravelAdvisorBot.Dialogs
                     message += $" from {state.DepartureCity}";
                 }
 
-                if (!string.IsNullOrEmpty(state.ArrivalCity))
+                if (!string.IsNullOrEmpty(state.ReturnCity))
                 {
-                    message += $" to {state.ArrivalCity}";
+                    message += $" to {state.ReturnCity}";
                 }
 
                 if (state.DepartureDate != DateTime.MinValue)
@@ -384,9 +387,9 @@ namespace TravelAdvisorBot.Dialogs
 
             return new FormBuilder<FlightsQuery>()
                 .Field(nameof(FlightsQuery.DepartureCity), (state) => string.IsNullOrEmpty(state.DepartureCity))
-                .Field(nameof(FlightsQuery.ArrivalCity), (state) => string.IsNullOrEmpty(state.ArrivalCity))
-                .Field(nameof(FlightsQuery.DepartureDate), (state) => { return state.DepartureDate != DateTime.MinValue; })
-                .Field(nameof(FlightsQuery.ReturnDate), (state) => { return state.ReturnDate != DateTime.MinValue; })
+                .Field(nameof(FlightsQuery.ReturnCity), (state) => string.IsNullOrEmpty(state.ReturnCity))
+                .Field(nameof(FlightsQuery.DepartureDate), (state) => { return state.DepartureDate == DateTime.MinValue; })
+                .Field(nameof(FlightsQuery.ReturnDate), (state) => { return state.ReturnDate == DateTime.MinValue; })
                 .OnCompletion(processFlightsSearch)
                 .Build();
         }

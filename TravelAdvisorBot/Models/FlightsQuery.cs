@@ -14,7 +14,7 @@ namespace TravelAdvisorBot.Models
         public string DepartureCity { get; set; }
 
         [Prompt("Please enter your {&}")]
-        public string ArrivalCity { get; set; }
+        public string ReturnCity { get; set; }
 
         [Prompt("Please enter your {&}")]
         public DateTime DepartureDate { get; set; }
