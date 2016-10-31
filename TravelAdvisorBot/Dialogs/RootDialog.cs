@@ -11,6 +11,7 @@ using Microsoft.Bot.Builder.Luis.Models;
 using Microsoft.Bot.Builder.FormFlow;
 
 using TravelAdvisorBot.Models;
+using System.Globalization;
 
 namespace TravelAdvisorBot.Dialogs
 {
@@ -227,7 +228,7 @@ namespace TravelAdvisorBot.Dialogs
         {
             var message = await activity;
 
-            await context.PostAsync($"Searching for Flights w/ '{message.Text}'");
+            //await context.PostAsync($"Searching for Flights w/ '{message.Text}'");
 
             var flightsQuery = new FlightsQuery();
 
@@ -246,9 +247,6 @@ namespace TravelAdvisorBot.Dialogs
             EntityRecommendation departureDateEntityRecommendation;
             if (result.TryFindEntity(EntityDepartureDate, out departureDateEntityRecommendation))
             {
-                // Always returns a string for the entity, either custom or built in.
-                //  Can use DateTime.Parse then turn back into a string to get 11/2 to 11/2/2016.
-                //  Or, would it be better to do this during the call to the web service?
                 departureDateEntityRecommendation.Type = "DepartureDate";
             }
 
@@ -281,8 +279,8 @@ namespace TravelAdvisorBot.Dialogs
                 {
                     HeroCard heroCard = new HeroCard()
                     {
-                        Title = $"${flight.Price}",
-                        Subtitle = $"",
+                        Title = $"{this.ToTitleCase(flight.DepartureAirport)} to {this.ToTitleCase(flight.ReturnAirport)}",
+                        Subtitle = $"${flight.Price}",
                         Images = new List<CardImage>()
                         {
                             new CardImage() { Url = flight.Image }
@@ -323,6 +321,11 @@ namespace TravelAdvisorBot.Dialogs
                 context.Done<object>(null);
             }
         }
+   
+        private string ToTitleCase(string str)
+        {
+            return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(str.ToLower());
+        }
 
         private async Task<IEnumerable<Flight>> GetFlightsAsync(FlightsQuery searchQuery)
         {
@@ -334,13 +337,13 @@ namespace TravelAdvisorBot.Dialogs
                 var random = new Random(i);
                 Flight flight = new Flight()
                 {
-                    DepartureAirport = $"{searchQuery.DepartureCity} (YYY)",
+                    DepartureAirport = $"{searchQuery.DepartureCity}",
                     DepartureAirline = "Alaska",
-                    DepartureDateTime = searchQuery.DepartureDate,
+                    DepartureDateTime = DateTime.Parse(searchQuery.DepartureDate),
                     DepartureFlightNumber = random.Next(101, 9999).ToString(),
-                    ReturnAirport = $"{searchQuery.ReturnCity} (WWW)",
+                    ReturnAirport = $"{searchQuery.ReturnCity}",
                     ReturnAirline = "United",
-                    ReturnDateTime = searchQuery.ReturnDate,
+                    ReturnDateTime = DateTime.Parse(searchQuery.ReturnDate),
                     ReturnFlightNumber = random.Next(101, 9999).ToString(),
                     Price = random.Next(80, 450),
                     Image = $"https://placeholdit.imgix.net/~text?txtsize=35&txt=Flight+{i + 1}&w=200&h=100"
@@ -358,6 +361,7 @@ namespace TravelAdvisorBot.Dialogs
         {
             OnCompletionAsyncDelegate<FlightsQuery> processFlightsSearch = async (context, state) =>
             {
+                // Script: Error on exception, Confirm on success.
                 var message = "Searching for flights";
 
                 if (!string.IsNullOrEmpty(state.DepartureCity))
@@ -370,12 +374,12 @@ namespace TravelAdvisorBot.Dialogs
                     message += $" to {state.ReturnCity}";
                 }
 
-                if (state.DepartureDate != DateTime.MinValue)
+                if (!string.IsNullOrEmpty(state.DepartureDate))
                 {
                     message += $" leaving on {state.DepartureDate}";
                 }
 
-                if (state.ReturnDate != DateTime.MinValue)
+                if (!string.IsNullOrEmpty(state.ReturnDate))
                 {
                     message += $" returning on {state.ReturnDate}";
                 }
@@ -386,10 +390,14 @@ namespace TravelAdvisorBot.Dialogs
             };
 
             return new FormBuilder<FlightsQuery>()
+                // Script: If we need to ask for more info, want to prompt:
+                //"Sure, I can help you search for those flights, but first I'll need more info..."
+
+                //ValidateResult for the dates.
                 .Field(nameof(FlightsQuery.DepartureCity), (state) => string.IsNullOrEmpty(state.DepartureCity))
                 .Field(nameof(FlightsQuery.ReturnCity), (state) => string.IsNullOrEmpty(state.ReturnCity))
-                .Field(nameof(FlightsQuery.DepartureDate), (state) => { return state.DepartureDate == DateTime.MinValue; })
-                .Field(nameof(FlightsQuery.ReturnDate), (state) => { return state.ReturnDate == DateTime.MinValue; })
+                .Field(nameof(FlightsQuery.DepartureDate), (state) => string.IsNullOrEmpty(state.DepartureDate))
+                .Field(nameof(FlightsQuery.ReturnDate), (state) => string.IsNullOrEmpty(state.ReturnDate))
                 .OnCompletion(processFlightsSearch)
                 .Build();
         }
