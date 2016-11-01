@@ -228,7 +228,7 @@ namespace TravelAdvisorBot.Dialogs
         {
             var message = await activity;
 
-            //await context.PostAsync($"Searching for Flights w/ '{message.Text}'");
+            await context.PostAsync($"Searching for Flights w/ '{message.Text}'");
 
             var flightsQuery = new FlightsQuery();
 
@@ -396,8 +396,48 @@ namespace TravelAdvisorBot.Dialogs
                 //ValidateResult for the dates.
                 .Field(nameof(FlightsQuery.DepartureCity), (state) => string.IsNullOrEmpty(state.DepartureCity))
                 .Field(nameof(FlightsQuery.ReturnCity), (state) => string.IsNullOrEmpty(state.ReturnCity))
-                .Field(nameof(FlightsQuery.DepartureDate), (state) => string.IsNullOrEmpty(state.DepartureDate))
-                .Field(nameof(FlightsQuery.ReturnDate), (state) => string.IsNullOrEmpty(state.ReturnDate))
+                .Field(nameof(FlightsQuery.DepartureDate), 
+                    active: (state) => string.IsNullOrEmpty(state.DepartureDate),
+                    validate: async (state, value) =>
+                    {
+                        var result = new ValidateResult { IsValid = true, Value = value };
+
+                        var resultString = (value as string).Trim();
+                        DateTime date;
+
+                        if (DateTime.TryParse(resultString, out date))
+                        {
+                            result.Value = date.ToShortDateString();
+                        }
+                        else
+                        {
+                            result.Feedback = $"'{resultString}' isn't a valid date. Try 'mm/dd/yyyy', etc.";
+                            result.IsValid = false;
+                        }
+
+                        return result;
+                    })
+                .Field(nameof(FlightsQuery.ReturnDate), 
+                    (state) => string.IsNullOrEmpty(state.ReturnDate),
+                    validate: async (state, value) =>
+                    {
+                        var result = new ValidateResult { IsValid = true, Value = value };
+
+                        var resultString = (value as string).Trim();
+                        DateTime date;
+
+                        if (DateTime.TryParse(resultString, out date))
+                        {
+                            result.Value = date.ToShortDateString();
+                        }
+                        else
+                        {
+                            result.Feedback = $"'{resultString}' isn't a valid date. Try 'mm/dd/yyyy', etc.";
+                            result.IsValid = false;
+                        }
+
+                        return result;
+                    })
                 .OnCompletion(processFlightsSearch)
                 .Build();
         }

@@ -22,7 +22,7 @@ namespace TravelAdvisorBot.Models
         // Can supply multiple to chose one at randome.
         [Prompt("What date would you like to leave?")]
         // Used to replace field in Pattern Language.
-        [Describe("departure date")]
+        //[Describe("departure date")]
         //[Pattern("regex goes here...")]
         //Numeric
         //Optional
