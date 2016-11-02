@@ -13,6 +13,8 @@ using Microsoft.Bot.Builder.FormFlow;
 using TravelAdvisorBot.Models;
 using System.Globalization;
 
+#pragma warning disable 1998
+
 namespace TravelAdvisorBot.Dialogs
 {
     [Serializable]
@@ -228,8 +230,6 @@ namespace TravelAdvisorBot.Dialogs
         {
             var message = await activity;
 
-            await context.PostAsync($"Searching for Flights w/ '{message.Text}'");
-
             var flightsQuery = new FlightsQuery();
 
             EntityRecommendation departureCityEntityRecommendation;
@@ -259,6 +259,92 @@ namespace TravelAdvisorBot.Dialogs
             var searchFlightsFormDialog = new FormDialog<FlightsQuery>(flightsQuery, this.BuildSearchFlightsForm, FormOptions.PromptInStart, result.Entities);
 
             context.Call(searchFlightsFormDialog, this.ResumeAfterSearchFlightsFormDialog);
+        }
+
+        private IForm<FlightsQuery> BuildSearchFlightsForm()
+        {
+            OnCompletionAsyncDelegate<FlightsQuery> processFlightsSearch = async (context, state) =>
+            {
+                // Script: Error on exception, Confirm on success.
+                var message = "OK, I'll look for flights";
+
+                if (!string.IsNullOrEmpty(this.ToTitleCase(state.DepartureCity)))
+                {
+                    message += $" from {state.DepartureCity}";
+                }
+
+                if (!string.IsNullOrEmpty(this.ToTitleCase(state.ReturnCity)))
+                {
+                    message += $" to {state.ReturnCity}";
+                }
+
+                if (!string.IsNullOrEmpty(state.DepartureDate))
+                {
+                    message += $" leaving {state.DepartureDate}";
+                }
+
+                if (!string.IsNullOrEmpty(state.ReturnDate))
+                {
+                    message += $" returning {state.ReturnDate}";
+                }
+
+                message += "...";
+
+                await context.PostAsync(message);
+            };
+
+            return new FormBuilder<FlightsQuery>()
+                .Message("Great, I can help you find flights!")
+                .Field(nameof(FlightsQuery.DepartureCity), (state) => string.IsNullOrEmpty(state.DepartureCity))
+                .Field(nameof(FlightsQuery.ReturnCity), (state) => string.IsNullOrEmpty(state.ReturnCity))
+                .Field(nameof(FlightsQuery.DepartureDate),
+                    active: (state) => string.IsNullOrEmpty(state.DepartureDate),
+                    validate: async (state, value) =>
+                    {
+                        var result = new ValidateResult { IsValid = true, Value = value };
+
+                        var resultString = (value as string).Trim();
+                        DateTime date;
+
+                        if (DateTime.TryParse(resultString, out date))
+                        {
+                            result.Value = date.ToShortDateString();
+                        }
+                        else
+                        {
+                            result.Feedback = $"I don't understand '{resultString}'. Try '11/22/2017', '11/22', Jan 22, etc.";
+                            result.IsValid = false;
+                        }
+
+                        return result;
+                    })
+                .Field(nameof(FlightsQuery.ReturnDate),
+                    (state) => string.IsNullOrEmpty(state.ReturnDate),
+                    validate: async (state, value) =>
+                    {
+                        var result = new ValidateResult { IsValid = true, Value = value };
+
+                        var resultString = (value as string).Trim();
+                        DateTime date;
+
+                        if (DateTime.TryParse(resultString, out date))
+                        {
+                            result.Value = date.ToShortDateString();
+                        }
+                        else
+                        {
+                            result.Feedback = $"I don't understand '{resultString}'. Try '11/22/2017', '11/22', Jan 22, etc.";
+                            result.IsValid = false;
+                        }
+
+                        return result;
+                    })
+                .Confirm(async (State) =>
+                {
+                    return new PromptAttribute($"FormFlow Confirm?");
+                })
+                .OnCompletion(processFlightsSearch)
+                .Build();
         }
 
         private async Task ResumeAfterSearchFlightsFormDialog(IDialogContext context, IAwaitable<FlightsQuery> result)
@@ -355,91 +441,6 @@ namespace TravelAdvisorBot.Dialogs
             flights.Sort((f1, f2) => f1.Price.CompareTo(f2.Price));
 
             return flights;
-        }
-
-        private IForm<FlightsQuery> BuildSearchFlightsForm()
-        {
-            OnCompletionAsyncDelegate<FlightsQuery> processFlightsSearch = async (context, state) =>
-            {
-                // Script: Error on exception, Confirm on success.
-                var message = "Searching for flights";
-
-                if (!string.IsNullOrEmpty(state.DepartureCity))
-                {
-                    message += $" from {state.DepartureCity}";
-                }
-
-                if (!string.IsNullOrEmpty(state.ReturnCity))
-                {
-                    message += $" to {state.ReturnCity}";
-                }
-
-                if (!string.IsNullOrEmpty(state.DepartureDate))
-                {
-                    message += $" leaving on {state.DepartureDate}";
-                }
-
-                if (!string.IsNullOrEmpty(state.ReturnDate))
-                {
-                    message += $" returning on {state.ReturnDate}";
-                }
-
-                message += "...";
-
-                await context.PostAsync(message);
-            };
-
-            return new FormBuilder<FlightsQuery>()
-                // Script: If we need to ask for more info, want to prompt:
-                //"Sure, I can help you search for those flights, but first I'll need more info..."
-
-                //ValidateResult for the dates.
-                .Field(nameof(FlightsQuery.DepartureCity), (state) => string.IsNullOrEmpty(state.DepartureCity))
-                .Field(nameof(FlightsQuery.ReturnCity), (state) => string.IsNullOrEmpty(state.ReturnCity))
-                .Field(nameof(FlightsQuery.DepartureDate), 
-                    active: (state) => string.IsNullOrEmpty(state.DepartureDate),
-                    validate: async (state, value) =>
-                    {
-                        var result = new ValidateResult { IsValid = true, Value = value };
-
-                        var resultString = (value as string).Trim();
-                        DateTime date;
-
-                        if (DateTime.TryParse(resultString, out date))
-                        {
-                            result.Value = date.ToShortDateString();
-                        }
-                        else
-                        {
-                            result.Feedback = $"'{resultString}' isn't a valid date. Try 'mm/dd/yyyy', etc.";
-                            result.IsValid = false;
-                        }
-
-                        return result;
-                    })
-                .Field(nameof(FlightsQuery.ReturnDate), 
-                    (state) => string.IsNullOrEmpty(state.ReturnDate),
-                    validate: async (state, value) =>
-                    {
-                        var result = new ValidateResult { IsValid = true, Value = value };
-
-                        var resultString = (value as string).Trim();
-                        DateTime date;
-
-                        if (DateTime.TryParse(resultString, out date))
-                        {
-                            result.Value = date.ToShortDateString();
-                        }
-                        else
-                        {
-                            result.Feedback = $"'{resultString}' isn't a valid date. Try 'mm/dd/yyyy', etc.";
-                            result.IsValid = false;
-                        }
-
-                        return result;
-                    })
-                .OnCompletion(processFlightsSearch)
-                .Build();
         }
 
         #endregion
