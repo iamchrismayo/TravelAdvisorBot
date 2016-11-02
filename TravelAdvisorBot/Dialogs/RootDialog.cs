@@ -295,10 +295,9 @@ namespace TravelAdvisorBot.Dialogs
 
             return new FormBuilder<FlightsQuery>()
                 .Message("Great, I can help you find flights!")
-                .Field(nameof(FlightsQuery.DepartureCity), (state) => string.IsNullOrEmpty(state.DepartureCity))
-                .Field(nameof(FlightsQuery.ReturnCity), (state) => string.IsNullOrEmpty(state.ReturnCity))
+                .Field(nameof(FlightsQuery.DepartureCity))
+                .Field(nameof(FlightsQuery.ReturnCity))
                 .Field(nameof(FlightsQuery.DepartureDate),
-                    active: (state) => string.IsNullOrEmpty(state.DepartureDate),
                     validate: async (state, value) =>
                     {
                         var result = new ValidateResult { IsValid = true, Value = value };
@@ -319,7 +318,6 @@ namespace TravelAdvisorBot.Dialogs
                         return result;
                     })
                 .Field(nameof(FlightsQuery.ReturnDate),
-                    (state) => string.IsNullOrEmpty(state.ReturnDate),
                     validate: async (state, value) =>
                     {
                         var result = new ValidateResult { IsValid = true, Value = value };
@@ -341,7 +339,7 @@ namespace TravelAdvisorBot.Dialogs
                     })
                 .Confirm(async (State) =>
                 {
-                    return new PromptAttribute($"FormFlow Confirm?");
+                    return new PromptAttribute("FormFlow Confirm? {||}");
                 })
                 .OnCompletion(processFlightsSearch)
                 .Build();
