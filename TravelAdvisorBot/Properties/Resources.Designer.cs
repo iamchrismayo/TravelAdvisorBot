@@ -61,11 +61,47 @@ namespace TravelAdvisorBot.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to Contoso Flowers. You can now order flowers or talk to support without leaving this bot..
+        ///   Looks up a localized string similar to I don&apos;t understand {0}. Please try again..
         /// </summary>
-        internal static string RootDialog_Welcome_Message {
+        internal static string RootDialog_SendWelcomeMessage_NotUnderstood {
             get {
-                return ResourceManager.GetString("RootDialog_Welcome_Message", resourceCulture);
+                return ResourceManager.GetString("RootDialog_SendWelcomeMessage_NotUnderstood", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search flights.
+        /// </summary>
+        internal static string RootDialog_SendWelcomeMessage_SearchFlights {
+            get {
+                return ResourceManager.GetString("RootDialog_SendWelcomeMessage_SearchFlights", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search hotels.
+        /// </summary>
+        internal static string RootDialog_SendWelcomeMessage_SearchHotels {
+            get {
+                return ResourceManager.GetString("RootDialog_SendWelcomeMessage_SearchHotels", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Welcome Subtitle.
+        /// </summary>
+        internal static string RootDialog_SendWelcomeMessage_Subtitle {
+            get {
+                return ResourceManager.GetString("RootDialog_SendWelcomeMessage_Subtitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Welcome Title.
+        /// </summary>
+        internal static string RootDialog_SendWelcomeMessage_Title {
+            get {
+                return ResourceManager.GetString("RootDialog_SendWelcomeMessage_Title", resourceCulture);
             }
         }
     }

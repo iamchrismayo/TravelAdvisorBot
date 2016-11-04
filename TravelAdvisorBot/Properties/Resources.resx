@@ -117,7 +117,20 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="RootDialog_Welcome_Message" xml:space="preserve">
-    <value>Welcome to Contoso Flowers. You can now order flowers or talk to support without leaving this bot.</value>
+  <data name="RootDialog_SendWelcomeMessage_NotUnderstood" xml:space="preserve">
+    <value>I don't understand {0}. Please try again.</value>
+    <comment>{0} is the message sent.</comment>
+  </data>
+  <data name="RootDialog_SendWelcomeMessage_SearchFlights" xml:space="preserve">
+    <value>Search flights</value>
+  </data>
+  <data name="RootDialog_SendWelcomeMessage_SearchHotels" xml:space="preserve">
+    <value>Search hotels</value>
+  </data>
+  <data name="RootDialog_SendWelcomeMessage_Subtitle" xml:space="preserve">
+    <value>Welcome Subtitle</value>
+  </data>
+  <data name="RootDialog_SendWelcomeMessage_Title" xml:space="preserve">
+    <value>Welcome Title</value>
   </data>
 </root>
