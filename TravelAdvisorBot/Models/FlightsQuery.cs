@@ -10,16 +10,16 @@ namespace TravelAdvisorBot.Models
     [Serializable]
     public class FlightsQuery
     {
-        //[Prompt("Where are you flying from?")]
+        [Prompt("Where are you flying from?")]
         public string DepartureCity { get; set; }
 
-        //[Prompt("Where are you flying to?")]
+        [Prompt("Where do you want to fly to?")]
         public string ReturnCity { get; set; }
 
-        //[Prompt("What date would you like to leave?")]
+        [Prompt("When do you want to leave?")]
         public string DepartureDate { get; set; }
 
-        //[Prompt("What date would you like to return?")]
+        [Prompt("When would you like to return?")]
         public string ReturnDate { get; set; }
     }
 }
