@@ -19,7 +19,7 @@ namespace TravelAdvisorBot.Dialogs
 {
     [Serializable]
     [LuisModel("d53866b9-50fd-4832-b436-d239ddb59d7b", "f0392b343da4490f9bc91197d6a5eda2")]
-    public class RootDialog : LuisDialog<object>
+    public class RootLuisDialog : LuisDialog<object>
     {
 
         [LuisIntent("")]
