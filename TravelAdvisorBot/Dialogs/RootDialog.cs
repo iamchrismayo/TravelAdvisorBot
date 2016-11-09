@@ -136,8 +136,11 @@ namespace TravelAdvisorBot.Dialogs
                         return result;
                     })
                 .Confirm(async (state) =>
-                {   
-                    return new PromptAttribute("Great, so I'm looking for flights from {DepartureCity} to {ReturnCity}, leaving {DepartureDate}, and returning {ReturnDate}. {||}");
+                {
+                    var message = $"Great, so I'm looking for flights from {this.ToTitleCase(state.DepartureCity)} to {this.ToTitleCase(state.ReturnCity)}, leaving {state.DepartureDate}, and returning {state.ReturnDate}. {{||}}";
+                    return new PromptAttribute(message);
+
+                    //return new PromptAttribute("Great, so I'm looking for flights from {DepartureCity} to {ReturnCity}, leaving {DepartureDate}, and returning {ReturnDate}. {||}");
                 })
                 .OnCompletion(processFlightsSearch)
                 .Build();
@@ -151,7 +154,7 @@ namespace TravelAdvisorBot.Dialogs
 
                 var flights = await this.GetFlightsAsync(searchQuery);
 
-                await context.PostAsync($"I found {flights.Count()} flights.");
+                await context.PostAsync($"OK, I found {flights.Count()} flights.");
 
                 var resultMessage = context.MakeMessage();
                 resultMessage.AttachmentLayout = AttachmentLayoutTypes.Carousel;
