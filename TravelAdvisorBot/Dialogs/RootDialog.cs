@@ -145,13 +145,9 @@ namespace TravelAdvisorBot.Dialogs
                 Flight flight = new Flight()
                 {
                     DepartureAirport = $"{searchQuery.DepartureCity}",
-                    DepartureAirline = "Alaska",
                     DepartureDateTime = DateTime.Parse(searchQuery.DepartureDate),
-                    DepartureFlightNumber = random.Next(101, 9999).ToString(),
                     ReturnAirport = $"{searchQuery.ReturnCity}",
-                    ReturnAirline = "United",
                     ReturnDateTime = DateTime.Parse(searchQuery.ReturnDate),
-                    ReturnFlightNumber = random.Next(101, 9999).ToString(),
                     Price = random.Next(80, 450),
                     Image = $"https://placeholdit.imgix.net/~text?txtsize=35&txt=Flight+{i + 1}&w=200&h=100"
                 };
