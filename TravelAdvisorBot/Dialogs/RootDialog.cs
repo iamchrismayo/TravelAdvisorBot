@@ -46,13 +46,41 @@
             {
                 this.flightsQuery.ReturnCity = await result;
 
-                await context.PostAsync("Done");
+                var departureDateDialog = new DateDialog("When do you want to leave ?");
+                context.Call(departureDateDialog, this.AfterDepartureDateDialog);
             }
             catch (TooManyAttemptsException)
             {
-                await context.PostAsync("Too Many Attempts");
+                context.Wait(this.MessageReceivedAsync);
             }
-            finally
+        }
+
+        private async Task AfterDepartureDateDialog(IDialogContext context, IAwaitable<string> result)
+        {
+            try
+            {
+                this.flightsQuery.DepartureDate = await result;
+
+                var returnDateDialog = new DateDialog("When would you like to return?");
+                context.Call(returnDateDialog, this.AfterReturnDateDialog);
+            }
+            catch (TooManyAttemptsException)
+            {
+                context.Wait(this.MessageReceivedAsync);
+            }
+        }
+
+        private async Task AfterReturnDateDialog(IDialogContext context, IAwaitable<string> result)
+        {
+            try
+            {
+                this.flightsQuery.ReturnDate = await result;
+
+                await context.PostAsync($"Flight Query: {this.flightsQuery.DepartureCity}");
+
+                context.Wait(this.MessageReceivedAsync);
+            }
+            catch (TooManyAttemptsException)
             {
                 context.Wait(this.MessageReceivedAsync);
             }
