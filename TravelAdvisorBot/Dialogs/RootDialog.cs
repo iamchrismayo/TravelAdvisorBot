@@ -118,12 +118,10 @@ namespace TravelAdvisorBot.Dialogs
 
                 await context.PostAsync(resultMessage);
 
+                context.Wait(MessageReceivedAsync);
+
             }
             catch (TooManyAttemptsException)
-            {
-                context.Wait(this.MessageReceivedAsync);
-            }
-            finally
             {
                 context.Wait(this.MessageReceivedAsync);
             }
