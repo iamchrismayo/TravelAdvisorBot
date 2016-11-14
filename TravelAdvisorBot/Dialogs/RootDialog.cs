@@ -35,9 +35,18 @@ namespace TravelAdvisorBot.Dialogs
 
         private async Task AfterSearchFlightsDialog(IDialogContext context, IAwaitable<string> result)
         {
-            var response = await result;
+            try
+            {
+                var response = await result;
 
-            await this.StartAsync(context);
+                await this.StartAsync(context);
+            }
+            catch (TooManyAttemptsException)
+            {
+
+                await context.PostAsync("Too Many Attemps!");
+                await StartAsync(context);
+            }
         }
     }
 }
