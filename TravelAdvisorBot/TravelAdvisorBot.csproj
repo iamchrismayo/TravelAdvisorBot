@@ -124,6 +124,7 @@
     <Compile Include="Dialogs\DateDialog.cs" />
     <Compile Include="Dialogs\RootDialog.cs" />
     <Compile Include="Dialogs\RootLuisDialog.cs" />
+    <Compile Include="Dialogs\SearchFlightsDialog.cs" />
     <Compile Include="Extensions\HeroCardExtensions.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
