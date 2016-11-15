@@ -1,26 +1,17 @@
-﻿using System;
-using System.Globalization;
-using TravelAdvisorBot.Models;
-
-namespace TravelAdvisorBot.Dialogs
+﻿namespace TravelAdvisorBot.Dialogs
 {
     using Microsoft.Bot.Builder.Dialogs;
     using Microsoft.Bot.Connector;
     using System;
     using System.Threading.Tasks;
-    using Models;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Linq;
-    using System.Web;
+    using Properties;
+    using Extensions;
 
 #pragma warning disable 1998
 
     [Serializable]
     public class RootDialog : IDialog<object>
     {
-        private FlightsQuery flightsQuery;
-
         public async Task StartAsync(IDialogContext context)
         {
             context.Wait(this.MessageReceivedAsync);
@@ -28,9 +19,48 @@ namespace TravelAdvisorBot.Dialogs
 
         private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> result)
         {
-            var searchFlightsDialog = new SearchFlightsDialog();
+            var message = await result;
 
-            context.Call(searchFlightsDialog, this.AfterSearchFlightsDialog);
+            await this.SendWelcomeMessageAsync(context);
+        }
+
+        private async Task SendWelcomeMessageAsync(IDialogContext context)
+        {
+            // TODO: Refactor to new context message and help message/menu.
+            var reply = context.MakeMessage();
+
+            var options = new[]
+            {
+                Resources.RootDialog_SendWelcomeMessage_SearchFlights,
+                Resources.RootDialog_SendWelcomeMessage_SearchHotels
+            };
+
+            reply.AddHeroCard(
+                Resources.RootDialog_SendWelcomeMessage_Title,
+                Resources.RootDialog_SendWelcomeMessage_Subtitle,
+                options,
+                new[] { "https://placeholdit.imgix.net/~text?txtsize=28&txt=Travel%20Advisor%20Bot&w=640&h=330" });
+
+            await context.PostAsync(reply);
+
+            context.Wait(this.WelcomeMessageOptionSelected);
+        }
+
+        private async Task WelcomeMessageOptionSelected(IDialogContext context, IAwaitable<IMessageActivity> result)
+        {
+            var message = await result;
+
+            if (message.Text == Resources.RootDialog_SendWelcomeMessage_SearchFlights)
+            {
+                var searchFlightsDialog = new SearchFlightsDialog();
+
+                context.Call(searchFlightsDialog, this.AfterSearchFlightsDialog);
+            }
+            else
+            {
+                await context.PostAsync(string.Format(Resources.RootDialog_SendWelcomeMessage_NotUnderstood, message.Text));
+                await this.SendWelcomeMessageAsync(context);
+            }
         }
 
         private async Task AfterSearchFlightsDialog(IDialogContext context, IAwaitable<string> result)
@@ -39,13 +69,13 @@ namespace TravelAdvisorBot.Dialogs
             {
                 var response = await result;
 
-                await this.StartAsync(context);
+                await this.SendWelcomeMessageAsync(context);
             }
             catch (TooManyAttemptsException)
             {
-
-                await context.PostAsync("I'm sorry you're having issues.");
-                await StartAsync(context);
+                await context.PostAsync("I'm sorry you're having issues with finding flights, we're working on it.");
+                // TODO: Is there anything else I can help you with?
+                await this.SendWelcomeMessageAsync(context);
             }
         }
     }

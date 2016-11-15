@@ -61,7 +61,7 @@ namespace TravelAdvisorBot.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to I don&apos;t understand {0}. Please try again..
+        ///   Looks up a localized string similar to I don&apos;t understand &apos;{0}&apos;. Please try again..
         /// </summary>
         internal static string RootDialog_SendWelcomeMessage_NotUnderstood {
             get {
@@ -88,7 +88,7 @@ namespace TravelAdvisorBot.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome Subtitle.
+        ///   Looks up a localized string similar to How can I help you today?.
         /// </summary>
         internal static string RootDialog_SendWelcomeMessage_Subtitle {
             get {
@@ -97,7 +97,7 @@ namespace TravelAdvisorBot.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome Title.
+        ///   Looks up a localized string similar to Travel Advisor Bot.
         /// </summary>
         internal static string RootDialog_SendWelcomeMessage_Title {
             get {
