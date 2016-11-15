@@ -32,9 +32,9 @@
 
                 PromptDialog.Text(context, this.AfterPromptReturnCity, "Where do you want to fly to?", "I'm sorry, I don't understand. Please try again.", 3);
             }
-            catch (TooManyAttemptsException)
+            catch (TooManyAttemptsException ex)
             {
-                await this.StartAsync(context);
+                context.Fail(ex);
             }
         }
 
@@ -47,9 +47,9 @@
                 var departureDateDialog = new DateDialog("When do you want to leave ?");
                 context.Call(departureDateDialog, this.AfterDepartureDateDialog);
             }
-            catch (TooManyAttemptsException)
+            catch (TooManyAttemptsException ex)
             {
-                await this.StartAsync(context);
+                context.Fail(ex);
             }
         }
 
@@ -62,9 +62,9 @@
                 var returnDateDialog = new DateDialog("When would you like to return?");
                 context.Call(returnDateDialog, this.AfterReturnDateDialog);
             }
-            catch (TooManyAttemptsException)
+            catch (TooManyAttemptsException ex)
             {
-                await this.StartAsync(context);
+                context.Fail(ex);
             }
         }
 
@@ -109,9 +109,9 @@
                 await context.PostAsync(resultMessage);
 
             }
-            catch (TooManyAttemptsException)
+            catch (TooManyAttemptsException ex)
             {
-                await this.StartAsync(context);
+                context.Fail(ex);
             }
             finally
             {

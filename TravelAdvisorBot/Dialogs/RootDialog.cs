@@ -44,7 +44,7 @@ namespace TravelAdvisorBot.Dialogs
             catch (TooManyAttemptsException)
             {
 
-                await context.PostAsync("Too Many Attemps!");
+                await context.PostAsync("I'm sorry you're having issues.");
                 await StartAsync(context);
             }
         }
