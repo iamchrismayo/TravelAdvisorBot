@@ -44,7 +44,8 @@
             {
                 this.flightsQuery.ReturnCity = await result;
 
-                var departureDateDialog = new DateDialog("When do you want to leave?");
+                var departureDateDialog = new DateDialog("When do you want to leave?", 
+                    "I'm sorry, I don't understand '{0}'. Try something like '" + DateTime.Now.ToShortDateString() + "'.");
                 context.Call(departureDateDialog, this.AfterDepartureDateDialog);
             }
             catch (TooManyAttemptsException ex)
@@ -59,7 +60,8 @@
             {
                 this.flightsQuery.DepartureDate = await result;
 
-                var returnDateDialog = new DateDialog("When would you like to return?");
+                var returnDateDialog = new DateDialog("When would you like to return?",
+                    "I'm sorry, I don't understand. Try something like '" + DateTime.Now.ToShortDateString() + "'.");
                 context.Call(returnDateDialog, this.AfterReturnDateDialog);
             }
             catch (TooManyAttemptsException ex)

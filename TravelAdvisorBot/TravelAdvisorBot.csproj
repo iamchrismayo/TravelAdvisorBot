@@ -123,6 +123,7 @@
     <Compile Include="Controllers\MessagesController.cs" />
     <Compile Include="Dialogs\DateDialog.cs" />
     <Compile Include="Dialogs\PromptDate.cs" />
+    <Compile Include="Dialogs\RetryDialog.cs" />
     <Compile Include="Dialogs\RootDialog.cs" />
     <Compile Include="Dialogs\RootLuisDialog.cs" />
     <Compile Include="Dialogs\SearchFlightsDialog.cs" />
