@@ -70,6 +70,15 @@ namespace TravelAdvisorBot.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to I&apos;m sorry, but &apos;{0}&apos; isn&apos;t ready yet..
+        /// </summary>
+        internal static string RootDialog_SendWelcomeMessage_NotYetImplemented {
+            get {
+                return ResourceManager.GetString("RootDialog_SendWelcomeMessage_NotYetImplemented", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Search flights.
         /// </summary>
         internal static string RootDialog_SendWelcomeMessage_SearchFlights {

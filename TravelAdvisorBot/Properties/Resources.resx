@@ -121,6 +121,10 @@
     <value>I don't understand '{0}'. Please try again.</value>
     <comment>{0} is the message sent.</comment>
   </data>
+  <data name="RootDialog_SendWelcomeMessage_NotYetImplemented" xml:space="preserve">
+    <value>I'm sorry, but '{0}' isn't ready yet.</value>
+    <comment>{0} is the message sent.</comment>
+  </data>
   <data name="RootDialog_SendWelcomeMessage_SearchFlights" xml:space="preserve">
     <value>Search flights</value>
   </data>

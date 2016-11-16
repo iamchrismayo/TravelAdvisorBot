@@ -44,7 +44,7 @@
             {
                 this.flightsQuery.ReturnCity = await result;
 
-                var departureDateDialog = new DateDialog("When do you want to leave ?");
+                var departureDateDialog = new DateDialog("When do you want to leave?");
                 context.Call(departureDateDialog, this.AfterDepartureDateDialog);
             }
             catch (TooManyAttemptsException ex)

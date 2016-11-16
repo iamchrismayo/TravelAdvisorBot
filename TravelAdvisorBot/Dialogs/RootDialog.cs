@@ -55,6 +55,10 @@
                 var searchFlightsDialog = new SearchFlightsDialog();
 
                 context.Call(searchFlightsDialog, this.AfterSearchFlightsDialog);
+            } else if(message.Text == Resources.RootDialog_SendWelcomeMessage_SearchHotels)
+            {
+                await context.PostAsync(string.Format(Resources.RootDialog_SendWelcomeMessage_NotYetImplemented, message.Text));
+                await this.SendWelcomeMessageAsync(context);
             }
             else
             {

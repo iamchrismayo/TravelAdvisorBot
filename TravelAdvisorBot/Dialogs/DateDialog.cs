@@ -37,11 +37,10 @@ namespace TravelAdvisorBot.Dialogs
             }
             else
             {
-                await context.PostAsync($"I don't understand '{message.Text}'. Try {DateTime.Now.ToShortDateString()}.");
+                await context.PostAsync($"Sorry, I don't understand '{message.Text}'. Try entering a date like '{DateTime.Now.ToShortDateString()}'.");
 
                 await this.StartAsync(context);
             }
-
         }
     }
 }
