@@ -54,11 +54,11 @@
             }
         }
 
-        private async Task AfterDepartureDateDialog(IDialogContext context, IAwaitable<string> result)
+        private async Task AfterDepartureDateDialog(IDialogContext context, IAwaitable<DateTime> result)
         {
             try
             {
-                this.flightsQuery.DepartureDate = await result;
+                this.flightsQuery.DepartureDate = (await result).ToShortDateString();
 
                 var returnDateDialog = new DateDialog("When would you like to return?",
                     "I'm sorry, I don't understand. Try something like '" + DateTime.Now.ToShortDateString() + "'.");
@@ -70,11 +70,11 @@
             }
         }
 
-        private async Task AfterReturnDateDialog(IDialogContext context, IAwaitable<string> result)
+        private async Task AfterReturnDateDialog(IDialogContext context, IAwaitable<DateTime> result)
         {
             try
             {
-                this.flightsQuery.ReturnDate = await result;
+                this.flightsQuery.ReturnDate = (await result).ToShortDateString();
 
                 var flights = await this.GetFlightsAsync(flightsQuery);
 
@@ -110,14 +110,11 @@
 
                 await context.PostAsync(resultMessage);
 
+                context.Done("Done!");
             }
             catch (TooManyAttemptsException ex)
             {
                 context.Fail(ex);
-            }
-            finally
-            {
-                context.Done("Done");
             }
         }
 
