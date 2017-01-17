@@ -13,7 +13,7 @@
 #pragma warning disable 1998
 
     [Serializable]
-    public class SearchFlightsDialog : IDialog<string>
+    public class SearchFlightsDialog : IDialog<object>
     {
         private FlightsQuery flightsQuery;
 
@@ -44,6 +44,11 @@
             {
                 this.flightsQuery.ReturnCity = await result;
 
+                /*var datePrompt = new PromptDate("When do you want to leave?",
+                    "I'm sorry, I don't understand '{0}'. Try something like '" + DateTime.Now.ToShortDateString() + "'.", 3,
+                    "I'm sorry I'm having issues. We'll work on that.");
+                context.Call(datePrompt, this.AfterDepartureDateDialog);*/
+
                 var departureDateDialog = new DateDialog("When do you want to leave?", 
                     "I'm sorry, I don't understand '{0}'. Try something like '" + DateTime.Now.ToShortDateString() + "'.");
                 context.Call(departureDateDialog, this.AfterDepartureDateDialog);
@@ -60,9 +65,14 @@
             {
                 this.flightsQuery.DepartureDate = (await result).ToShortDateString();
 
-                var returnDateDialog = new DateDialog("When would you like to return?",
+                var datePrompt = new PromptDate("When would you like to return?",
+                    "I'm sorry, I don't understand '{0}'. Try something like '" + DateTime.Now.ToShortDateString() + "'.", 3, 
+                    "I'm sorry I'm having issues. We'll work on that.");
+                context.Call(datePrompt, this.AfterReturnDateDialog);
+
+                /*var returnDateDialog = new DateDialog("When would you like to return?",
                     "I'm sorry, I don't understand. Try something like '" + DateTime.Now.ToShortDateString() + "'.");
-                context.Call(returnDateDialog, this.AfterReturnDateDialog);
+                context.Call(returnDateDialog, this.AfterReturnDateDialog);*/
             }
             catch (TooManyAttemptsException ex)
             {
@@ -110,7 +120,7 @@
 
                 await context.PostAsync(resultMessage);
 
-                context.Done("Done!");
+                context.Done<object>(null);
             }
             catch (TooManyAttemptsException ex)
             {
